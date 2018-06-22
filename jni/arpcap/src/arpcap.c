@@ -207,10 +207,11 @@ int filters_init(TranscodeContext *ctx)
       for (int j = 0; j < i; j++)
       {
         filter = ctx->filters[j];
-        ctx->priv_data = ctx->filter_data[i];
+        ctx->priv_data = ctx->filter_data[j];
         if (filter->fini != NULL) filter->fini(ctx);
         av_freep(ctx->filter_data + j);
       }
+      av_freep(ctx->filter_data + i);
 
       break;
     }
@@ -299,7 +300,12 @@ void *av_thread(void *opaque)
 {
   TranscodeContext *ctx = (TranscodeContext *) opaque;
 
-  int ret = filters_init(ctx); assert(ret >= 0);
+  int ret = filters_init(ctx);
+  if (ret < 0)
+  {
+    fprintf(stderr, "filters init failed.\n");
+    exit(-1);
+  }
 
   AVPacket pkt;
   pkt.data = NULL;

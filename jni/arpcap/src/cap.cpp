@@ -206,12 +206,17 @@ int cap_read(Cap *cap, AVPacket *pkt) {
 }
 
 int cap_close(Cap *cap) {
-    delete[] cap->data[0];
+    arpcap_destroy();
+
+    if (cap->size > 0)
+    {
+        delete[] cap->data[0];
+    }
     delete cap;
 
+    delete sFRunner;
     sFRunner = nullptr;
 
-    arpcap_destroy();
     arpcap_fini();
 
     return 0;

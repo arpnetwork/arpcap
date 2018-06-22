@@ -35,7 +35,8 @@ static int pipe_init(TranscodeContext *ctx, int type)
   sscanf(ctx->output, "pipe://%d", &pipe->fd);
   pipe->package = ctx->param.package;
 
-  if (pipe->fd == STDOUT_FILENO) {
+  if (pipe->fd == STDOUT_FILENO)
+  {
     setbuf(stdout, NULL);
   }
 
