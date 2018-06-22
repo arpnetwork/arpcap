@@ -37,6 +37,7 @@ void filter_register_all()
   REGISTER_FILTER(pipe);
   REGISTER_FILTER(repeat);
   REGISTER_FILTER(stat);
+  REGISTER_FILTER(tcp);
 }
 
 Filter *find_filter(const char *name)

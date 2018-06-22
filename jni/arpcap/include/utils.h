@@ -35,6 +35,8 @@ int new_packet_from_data(AVPacket *pkt, uint8_t *data, int size);
 int new_packet_from_frame(AVPacket *pkt, AVFrame *frame);
 int new_frame_from_packet(AVFrame *frame, AVPacket *pkt);
 
+ssize_t write_fully(int fd, const void *buf, size_t nbyte);
+
 #ifdef __cplusplus
 }
 #endif

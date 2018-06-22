@@ -25,7 +25,6 @@ typedef struct {
 } PipeContext;
 
 static ssize_t write_data(PipeContext *pipe, const void *buf, size_t nbyte);
-static ssize_t write_fully(int fd, const void *buf, size_t nbyte);
 
 static int pipe_init(TranscodeContext *ctx, int type)
 {
@@ -80,26 +79,6 @@ ssize_t write_data(PipeContext *pipe, const void *buf, size_t nbyte)
   }
 
   return write_fully(pipe->fd, buf, nbyte);
-}
-
-ssize_t write_fully(int fd, const void *buf, size_t nbyte)
-{
-  ssize_t res = 0;
-
-  const uint8_t *p = (const uint8_t *)buf;
-  while (nbyte > 0)
-  {
-    res = write(fd, p, nbyte);
-    if (res < 0)
-    {
-      return res;
-    }
-
-    p += res;
-    nbyte -= res;
-  }
-
-  return p - (const uint8_t *)buf;
 }
 
 Filter pipe_filter = {

@@ -19,6 +19,7 @@
 #include <libavutil/imgutils.h>
 
 #include <assert.h>
+#include <unistd.h>
 
 static int new_frame_from_data(AVFrame *frame, uint8_t *data, int size);
 
@@ -92,4 +93,24 @@ int new_frame_from_data(AVFrame *frame, uint8_t *data, int size)
   }
 
   return 0;
+}
+
+ssize_t write_fully(int fd, const void *buf, size_t nbyte)
+{
+  ssize_t res = 0;
+
+  const uint8_t *p = (const uint8_t *)buf;
+  while (nbyte > 0)
+  {
+    res = write(fd, p, nbyte);
+    if (res < 0)
+    {
+      return res;
+    }
+
+    p += res;
+    nbyte -= res;
+  }
+
+  return p - (const uint8_t *)buf;
 }

@@ -10,6 +10,7 @@ LOCAL_SRC_FILES := \
 	src/filters/pipe.c \
 	src/filters/repeat.c \
 	src/filters/stat.c \
+	src/filters/tcp.c \
 	src/cap.cpp \
 	src/filter.c \
 	src/utils.c \
