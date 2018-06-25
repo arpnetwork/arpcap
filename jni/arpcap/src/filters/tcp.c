@@ -21,6 +21,7 @@
 #include <unistd.h>
 
 #include <arpa/inet.h>
+#include <netinet/tcp.h>
 #include <sys/socket.h>
 
 typedef struct {
@@ -55,6 +56,10 @@ static int tcp_init(TranscodeContext *ctx, int type)
   addr.sin_port = htons(atoi(port));
   addr.sin_addr.s_addr = inet_addr(ip);
   bzero(&addr.sin_zero, 8);
+
+  // Turns Nagle's algorithm off
+  int on = 1;
+  setsockopt(tcp->fd, IPPROTO_TCP, TCP_NODELAY, &on, sizeof(on));
 
   int ret = connect(tcp->fd, (struct sockaddr *)&addr, sizeof(struct sockaddr));
   if (ret < 0)
