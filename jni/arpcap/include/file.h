@@ -14,29 +14,24 @@
  * limitations under the License.
  */
 
-#ifndef ARP_UTILS_H_
-#define ARP_UTILS_H_
+#ifndef ARP_FILE_H_
+#define ARP_FILE_H_
+
+#include <unistd.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <libavformat/avformat.h>
+typedef struct FileContext {
+  int fd;
+  int package;
+} FileContext;
 
-#define PKT_MKSIZE(pkt, w, h) \
-  do  \
-  { \
-    (pkt)->pos = ((int64_t) (w) << 32) | (h); \
-  } while (0)
-#define PKT_WIDTH(pkt)        ((pkt)->pos >> 32)
-#define PKT_HEIGHT(pkt)       ((pkt)->pos & 0xFFFF)
-
-int new_packet_from_data(AVPacket *pkt, uint8_t *data, int size);
-int new_packet_from_frame(AVPacket *pkt, AVFrame *frame);
-int new_frame_from_packet(AVFrame *frame, AVPacket *pkt);
+ssize_t write_data(FileContext *file, const void *buf, size_t nbyte);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  // ARP_UTILS_H_
+#endif  // ARP_FILE_H_

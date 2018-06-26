@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
+#include <file.h>
 #include <transcode.h>
 
 #include <assert.h>
 #include <fcntl.h>
 #include <unistd.h>
-
-typedef struct {
-  int fd;
-  int package;
-} FileContext;
 
 typedef struct {
   int fd;
@@ -34,7 +30,7 @@ static pthread_mutex_t file_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static FileRef file_ref = { -1, 0 };
 
-static ssize_t write_data(FileContext *file, const void *buf, size_t nbyte);
+static ssize_t write_fully(int fd, const void *buf, size_t nbyte);
 
 static int file_init(TranscodeContext *ctx, int type)
 {
@@ -114,6 +110,26 @@ ssize_t write_data(FileContext *file, const void *buf, size_t nbyte)
   }
 
   return write_fully(file->fd, buf, nbyte);
+}
+
+ssize_t write_fully(int fd, const void *buf, size_t nbyte)
+{
+  ssize_t res = 0;
+
+  const uint8_t *p = (const uint8_t *)buf;
+  while (nbyte > 0)
+  {
+    res = write(fd, p, nbyte);
+    if (res < 0)
+    {
+      return res;
+    }
+
+    p += res;
+    nbyte -= res;
+  }
+
+  return p - (const uint8_t *)buf;
 }
 
 Filter file_filter = {

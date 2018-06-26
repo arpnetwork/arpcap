@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
+#include <file.h>
 #include <transcode.h>
 
 #include <assert.h>
 #include <unistd.h>
 
-typedef struct {
-  int fd;
-  int package;
-} PipeContext;
-
-static ssize_t write_data(PipeContext *pipe, const void *buf, size_t nbyte);
+typedef FileContext PipeContext;
 
 static int pipe_init(TranscodeContext *ctx, int type)
 {
@@ -66,19 +62,6 @@ static int pipe_apply(TranscodeContext *ctx, AVPacket *pkt)
   {
     return AVERROR(EAGAIN);
   }
-}
-
-ssize_t write_data(PipeContext *pipe, const void *buf, size_t nbyte)
-{
-  if (pipe->package)
-  {
-    if (write_fully(pipe->fd, &nbyte, 4) < 0)
-    {
-      return -1;
-    }
-  }
-
-  return write_fully(pipe->fd, buf, nbyte);
 }
 
 Filter pipe_filter = {

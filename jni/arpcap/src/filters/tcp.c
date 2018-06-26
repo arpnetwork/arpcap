@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <file.h>
 #include <transcode.h>
 
 #include <assert.h>
@@ -24,12 +25,7 @@
 #include <netinet/tcp.h>
 #include <sys/socket.h>
 
-typedef struct {
-  int fd;
-  int package;
-} TcpContext;
-
-static ssize_t write_data(TcpContext *tcp, const void *buf, size_t nbyte);
+typedef FileContext TcpContext;
 
 static int tcp_init(TranscodeContext *ctx, int type)
 {
@@ -103,19 +99,6 @@ static int tcp_apply(TranscodeContext *ctx, AVPacket *pkt)
   {
     return AVERROR(EAGAIN);
   }
-}
-
-ssize_t write_data(TcpContext *tcp, const void *buf, size_t nbyte)
-{
-  if (tcp->package)
-  {
-    if (write_fully(tcp->fd, &nbyte, 4) < 0)
-    {
-      return -1;
-    }
-  }
-
-  return write_fully(tcp->fd, buf, nbyte);
 }
 
 Filter tcp_filter = {
