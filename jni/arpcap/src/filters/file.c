@@ -17,35 +17,41 @@
 #include <transcode.h>
 
 #include <assert.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 typedef struct {
-  FILE *fp;
+  int fd;
+  int package;
 } FileContext;
 
 typedef struct {
-  FILE *fp;
+  int fd;
   int ref;
 } FileRef;
 
 static pthread_mutex_t file_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-static FileRef file_ref = { NULL, 0 };
+static FileRef file_ref = { -1, 0 };
+
+static ssize_t write_data(FileContext *file, const void *buf, size_t nbyte);
 
 static int file_init(TranscodeContext *ctx, int type)
 {
   assert(type == FT_OUTPUT);
 
   FileContext *file = (FileContext *) ctx->priv_data;
+  file->package = ctx->param.package;
 
   char path[PATH_MAX];
   sscanf(ctx->output, "file://%s", path);
 
   pthread_mutex_lock(&file_mutex);
-  if (file_ref.fp == NULL)
+  if (file_ref.fd == -1)
   {
-    file_ref.fp = fopen(path, "wb"); assert(file_ref.fp != NULL);
+    file_ref.fd = open(path, O_WRONLY | O_CREAT | O_TRUNC); assert(file_ref.fd >= 0);
   }
-  file->fp = file_ref.fp;
+  file->fd = file_ref.fd;
   file_ref.ref++;
   pthread_mutex_unlock(&file_mutex);
 
@@ -57,12 +63,12 @@ static int file_fini(TranscodeContext *ctx)
   FileContext *file = (FileContext *) ctx->priv_data;
 
   pthread_mutex_lock(&file_mutex);
-  file->fp = NULL;
+  file->fd = -1;
   file_ref.ref--;
   if (file_ref.ref == 0)
   {
-    fclose(file_ref.fp);
-    file_ref.fp = NULL;
+    close(file_ref.fd);
+    file_ref.fd = -1;
   }
   pthread_mutex_unlock(&file_mutex);
 
@@ -82,10 +88,9 @@ static int file_apply(TranscodeContext *ctx, AVPacket *pkt)
                                                  &extradata_size);
     if (extradata != NULL)
     {
-      fwrite(extradata, extradata_size, 1, file->fp);
+      write_data(file, extradata, extradata_size);
     }
-    fwrite(pkt->data, pkt->size, 1, file->fp);
-    fflush(file->fp);
+    write_data(file, pkt->data, pkt->size);
     pthread_mutex_unlock(&file_mutex);
 
     av_packet_unref(pkt);
@@ -96,6 +101,19 @@ static int file_apply(TranscodeContext *ctx, AVPacket *pkt)
   {
     return AVERROR(EAGAIN);
   }
+}
+
+ssize_t write_data(FileContext *file, const void *buf, size_t nbyte)
+{
+  if (file->package)
+  {
+    if (write_fully(file->fd, &nbyte, 4) < 0)
+    {
+      return -1;
+    }
+  }
+
+  return write_fully(file->fd, buf, nbyte);
 }
 
 Filter file_filter = {
