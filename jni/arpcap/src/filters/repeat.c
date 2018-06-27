@@ -34,6 +34,7 @@ static int repeat_init(TranscodeContext *ctx, int type)
   (void) type;
 
   RepeatContext *repeat = (RepeatContext *) ctx->priv_data;
+  repeat->pkt = av_packet_alloc();
   repeat->interval = FFMAX(1000000 / ctx->param.framerate * 2, REPEAT_INTERVAL);
 
   return 0;
@@ -55,16 +56,16 @@ static int repeat_apply(TranscodeContext *ctx, AVPacket *pkt)
   int64_t now = av_gettime();
   if (pkt != NULL && pkt->data != NULL)
   {
-    if (repeat->pkt != NULL) av_packet_free(&repeat->pkt);
+    if (repeat->pkt->data != NULL) av_packet_unref(repeat->pkt);
 
-    repeat->pkt = av_packet_clone(pkt);
+    av_packet_ref(repeat->pkt, pkt);
     repeat->last_ts = now;
 
     return 0;
   }
   else
   {
-    if (repeat->pkt != NULL && pkt != NULL &&
+    if (repeat->pkt->data != NULL && pkt != NULL &&
         now - repeat->last_ts >= repeat->interval)
     {
       av_packet_ref(pkt, repeat->pkt);

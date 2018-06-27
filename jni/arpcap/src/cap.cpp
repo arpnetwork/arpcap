@@ -32,7 +32,7 @@ struct Cap {
   int width;
   int height;
 
-  int size;
+  AVPacket *pkt;
   uint8_t *data[3];
   int linesize[3];
 };
@@ -155,7 +155,7 @@ Cap *cap_open(int width, int height, int framerate) {
     }
 
     Cap *cap = new Cap();
-    cap->size = 0;
+    cap->pkt = nullptr;
 
     return cap;
 }
@@ -166,13 +166,14 @@ int cap_read(Cap *cap, AVPacket *pkt) {
         return AVERROR(EAGAIN);
     }
 
-    if (cap->size == 0) {
+    if (cap->pkt == nullptr) {
         int width = fb.width;
         int height = fb.height;
         cap->width = width;
         cap->height = height;
-        cap->size = width * height * 3 / 2;
-        cap->data[0] = new uint8_t[cap->size];
+        cap->pkt = av_packet_alloc();
+        av_new_packet(cap->pkt, width * height * 3 / 2);
+        cap->data[0] = cap->pkt->data;
         cap->data[1] = cap->data[0] + width * height;
         cap->data[2] = cap->data[1] + width * height / 4;
         cap->linesize[0] = width;
@@ -198,7 +199,7 @@ int cap_read(Cap *cap, AVPacket *pkt) {
 
     sFRunner->release();
 
-    new_packet_from_data(pkt, cap->data[0], cap->size);
+    av_packet_ref(pkt, cap->pkt);
     pkt->stream_index = AVMEDIA_TYPE_VIDEO;
     PKT_MKSIZE(pkt, cap->width, cap->height);
 
@@ -208,9 +209,9 @@ int cap_read(Cap *cap, AVPacket *pkt) {
 int cap_close(Cap *cap) {
     arpcap_destroy();
 
-    if (cap->size > 0)
+    if (cap->pkt != nullptr)
     {
-        delete[] cap->data[0];
+        av_packet_free(&cap->pkt);
     }
     delete cap;
 
