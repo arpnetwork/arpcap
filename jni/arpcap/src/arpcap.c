@@ -28,6 +28,7 @@
 #include <signal.h>
 
 #define DEFAULT_FRAMERATE 15
+#define DEFAULT_PRESET    "veryfast"
 
 static void print_usage_and_exit(const char *cmd);
 static char *parse_protocol_name(const char *addr);
@@ -51,12 +52,14 @@ int main(int argc, char *argv[])
   TranscodeParam param;
   memset(&param, 0, sizeof (param));
   param.framerate = DEFAULT_FRAMERATE;
+  strcpy(param.preset, DEFAULT_PRESET);
 
   struct option long_options[] = {
       { "bitrate",          required_argument, NULL, 'b' },
       { "crf",              required_argument, NULL, 'c' },
       { "video-size",       required_argument, NULL, 's' },
       { "framerate",        required_argument, NULL, 'r' },
+      { "preset",           required_argument, NULL, 'P' },
       { "package",          no_argument,       NULL, 'p' },
       { "verbose",          no_argument,       NULL, 'v' },
       { NULL,               0,                 NULL, 0   }
@@ -89,6 +92,11 @@ int main(int argc, char *argv[])
 
     case 'r':
       param.framerate = atoi(optarg);
+      break;
+
+    case 'P':
+      strncpy(param.preset, optarg, PRESET_LENGTH - 1);
+      param.preset[PRESET_LENGTH - 1] = '\0';
       break;
 
     case 'p':
@@ -157,12 +165,16 @@ void print_usage_and_exit(const char *cmd)
 {
   fprintf(stderr, "\
 Usage: %s [OPTION] OUTPUT\n\
-  -b, --bitrate=BITRATE         video bitrate (h264)\n\
-  -c, --crf=CRF                 video crf (0 - 53) [23] (h264)\n\
-  -s, --video-size=WxH          video size (WxH)\n\
-  -r, --framerate=RATE          video framerate [15]\n\
-  -p, --package                 package output\n\
-      --verbose                 verbose output\n", cmd);
+  -b, --bitrate=BITRATE         Set bitrate (kbit/s)\n\
+  -c, --crf=CRF                 Quality-based VBR (0-51) [23]\n\
+  -s, --video-size=WxH          Set video size (WxH)\n\
+  -r, --framerate=RATE          Specify framerate [15]\n\
+      --preset=PRESET           Use a preset to select encoding settings [veryfast]\n\
+                                Overridden by user settings.\n\
+                                - ultrafast,superfast,veryfast,faster,fast\n\
+                                - medium,slow,slower,veryslow,placebo\n\
+  -p, --package                 Package output\n\
+      --verbose                 Verbose output\n", cmd);
   exit(-1);
 }
 

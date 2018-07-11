@@ -139,7 +139,7 @@ AVCodecContext *open_h264_encoder(
 
   av_opt_set(ctx->priv_data, "profile", "high", 0);
   av_opt_set(ctx->priv_data, "level", "5.2", 0);
-  av_opt_set(ctx->priv_data, "preset", "veryfast", 0);
+  av_opt_set(ctx->priv_data, "preset", param->preset, 0);
   av_opt_set(ctx->priv_data, "tune", "zerolatency", 0);
   if (param->crf > 0)
   {

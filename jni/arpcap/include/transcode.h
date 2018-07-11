@@ -29,6 +29,7 @@ extern "C" {
 #include <pthread.h>
 
 #define MAX_FILTERS   8
+#define PRESET_LENGTH 16
 
 enum StreamType
 {
@@ -49,6 +50,7 @@ typedef struct TranscodeParam {
   int crf;
   int bitrate;
   int framerate;
+  char preset[PRESET_LENGTH];
   int package;
 } TranscodeParam;
 
