@@ -26,7 +26,9 @@ int arpcap_get_display_info(ARPDisplayInfo *info) {
     return 0;
 }
 
-int arpcap_create(uint32_t width, uint32_t height, arp_callback cb) {
+int arpcap_create(
+    uint32_t paddingTop, uint32_t paddingBottom, uint32_t width, uint32_t height, arp_callback cb)
+{
     return 0;
 }
 

@@ -36,7 +36,9 @@ static int cap_init(TranscodeContext *ctx, int type)
 
   CapContext *cap = (CapContext *) ctx->priv_data;
 
-  cap->cap = cap_open(ctx->param.width, ctx->param.height, ctx->param.framerate);
+  cap->cap = cap_open(
+    ctx->param.top, ctx->param.bottom,
+    ctx->param.width, ctx->param.height, ctx->param.framerate);
 
   return 0;
 }

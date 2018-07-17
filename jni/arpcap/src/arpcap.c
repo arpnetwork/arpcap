@@ -58,6 +58,8 @@ int main(int argc, char *argv[])
       { "bitrate",          required_argument, NULL, 'b' },
       { "crf",              required_argument, NULL, 'c' },
       { "video-size",       required_argument, NULL, 's' },
+      { "crop-top",         required_argument, NULL, 'T' },
+      { "crop-bottom",      required_argument, NULL, 'B' },
       { "framerate",        required_argument, NULL, 'r' },
       { "preset",           required_argument, NULL, 'P' },
       { "package",          no_argument,       NULL, 'p' },
@@ -88,6 +90,14 @@ int main(int argc, char *argv[])
 
     case 's':
       sscanf(optarg, "%dx%d", &param.width, &param.height);
+      break;
+
+    case 'T':
+      param.top = atoi(optarg);
+      break;
+
+    case 'B':
+      param.bottom = atoi(optarg);
       break;
 
     case 'r':
@@ -168,6 +178,8 @@ Usage: %s [OPTION] OUTPUT\n\
   -b, --bitrate=BITRATE         Set bitrate (kbit/s)\n\
   -c, --crf=CRF                 Quality-based VBR (0-51) [23]\n\
   -s, --video-size=WxH          Set video size (WxH)\n\
+      --crop-top=TOP            Crop the top\n\
+      --crop-bottom=BOTTOM      Crop the bottom\n\
   -r, --framerate=RATE          Specify framerate [15]\n\
       --preset=PRESET           Use a preset to select encoding settings [veryfast]\n\
                                 Overridden by user settings.\n\

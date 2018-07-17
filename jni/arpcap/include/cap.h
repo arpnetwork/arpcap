@@ -25,7 +25,7 @@ extern "C" {
 
 typedef struct Cap Cap;
 
-Cap *cap_open(int width, int height, int framerate);
+Cap *cap_open(int top, int bottom, int width, int height, int framerate);
 int cap_read(Cap *cap, AVPacket *pkt);
 int cap_close(Cap *cap);
 

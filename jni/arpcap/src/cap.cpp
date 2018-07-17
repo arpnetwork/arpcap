@@ -126,7 +126,7 @@ void FrameRunner::release() {
     }
 }
 
-Cap *cap_open(int width, int height, int framerate) {
+Cap *cap_open(int top, int bottom, int width, int height, int framerate) {
     arpcap_init();
 
     if (width == 0 && height == 0)
@@ -144,7 +144,7 @@ Cap *cap_open(int width, int height, int framerate) {
     auto cb = [](uint64_t frameNumber, int64_t timestamp) {
         sFRunner->onFrameAvailable(frameNumber, timestamp);
     };
-    int res = arpcap_create(width, height, cb);
+    int res = arpcap_create(top, bottom, width, height, cb);
     if (res != 0) {
         LOGE("Unable to create display.");
         delete sFRunner;

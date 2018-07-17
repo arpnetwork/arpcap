@@ -44,6 +44,8 @@ enum CodecID
 };
 
 typedef struct TranscodeParam {
+  int top;
+  int bottom;
   int width;
   int height;
   enum CodecID codec;
