@@ -144,6 +144,10 @@ int main(int argc, char *argv[])
   signal(SIGINT, sigroutine);
   signal(SIGTERM, sigroutine);
 
+  if (!verbose) {
+    av_log_set_level(AV_LOG_WARNING);
+  }
+
   TranscodeContext video = {
     .type = ST_VIDEO,
     .param = param,
